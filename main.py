@@ -27,7 +27,7 @@ print(objective(alpha, Q))
 
 # initial guesses
 n = len(X_train)
-x0 = np.zeros((n,1))
+x0 = np.zeros((n,))
 
 # show initial objective
 print('Initial Objective: ' + str(objective(x0, Q)))
@@ -42,8 +42,7 @@ bnds = tuple(b for i in range(n))
 con = lambda alpha: constraint1(y_train, alpha)
 con1 = {'type': 'eq', 'fun': con}
 cons = ([con1])
-solution = minimize(objective, x0, args = (Q), method='SLSQP',
-                    bounds=bnds, constraints=cons)
+solution = minimize(objective, x0, args = (Q), method='SLSQP', bounds=bnds, constraints=cons)
 x = solution.x
 
 # show final objective
@@ -52,3 +51,21 @@ print('Final Objective: ' + str(objective(x, Q)))
 # print solution
 print('Solution')
 
+gamma_values = [2**e for e in range(-2,3,1)]
+C_values = [2**e for e in range(-2,3,1)]
+
+score = dict()
+L = X_train.shape[0]
+x0 = np.zeros((L,))
+for gamma in gamma_values:
+    for C in C_values:
+        score[(C, gamma)] = dict()
+        Q = Q_matrix(X_train, y_train, gamma)
+        b = (0, C)
+        bnds = tuple(b for i in range(L))
+        con = lambda alpha: constraint1(y_train, alpha)
+        con1 = {'type': 'eq', 'fun': con}
+        cons = ([con1])
+        solution = minimize(objective, x0, args = (Q), method='SLSQP', bounds=bnds, constraints=cons)
+        x = solution.x
+        print('Final Objective: ' + str(objective(x, Q)))
