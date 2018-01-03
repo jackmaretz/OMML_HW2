@@ -1,8 +1,6 @@
 #! /usr/bin/env python3
-
 import pandas as pd
 from sklearn.model_selection import train_test_split
-
 from functionsGiac import *
 
 # Importing dataset
@@ -12,23 +10,16 @@ y = 2*(dataset.iloc[:, -1].values.reshape(-1,1)) - 1 # Mapping {0, 1} to {-1, 1}
 
 # Split train, validation, test set
 X_train_n_validation, X_test, y_train_n_validation, y_test = train_test_split(X, y, test_size = 0.3, random_state = 1733715)
-
 X_train, X_validation, y_train, y_validation = train_test_split(X_train_n_validation, y_train_n_validation, test_size = 0.3, random_state = 1733715)
-
 # Q matrix of the dual problem
 Q = Q_matrix(X_train, y_train, 1)
-
 # Inintialize vector of Lagrage multipliers
 L = X_train.shape[0]
 alpha = np.zeros((L, 1))
-
 print(objective(alpha, Q))
-
-
 # initial guesses
 n = len(X_train)
 x0 = np.zeros((n,))
-
 # show initial objective
 print('Initial Objective: ' + str(objective(x0, Q)))
 
