@@ -9,17 +9,23 @@ Created on Fri Jan  5 17:30:29 2018
 import pandas as pd
 from scipy.optimize import minimize
 import numpy as np
-import time
 from sklearn.model_selection import train_test_split
 from collections import Counter
-from sklearn.model_selection import KFold
 from fun import *
+from sklearn.preprocessing import scale
 
 h_gamma = 0.0001
 seed = 1733715
 np.random.seed(seed = seed)
 
-data = pd.read_csv('2017.12.11 Dataset Project 2.csv', header = 0)
+dataset = pd.read_csv('2017.12.11 Dataset Project 2.csv', header = 0)
+
+data = pd.DataFrame()
+
+for col_name, column in dataset.iteritems():
+    data[col_name] = scale(dataset[col_name])
+data.y = dataset.y
+
 
 X = data.iloc[:, :-1].values
 Y = (data.iloc[:, -1].values*2 - 1).reshape(-1,1)
@@ -27,7 +33,7 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.3, rando
 
 L = len(X_train)
 
-
+#%%
 #grid
 score_list = dict()
 gamma_values = [2**-e for e in range(0,20)]
@@ -61,7 +67,7 @@ for gamma in gamma_values:
             score = np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
             score_list[(gamma, C)] = score
 
-        print('\rRemaining parameters: % 3d' %(tot_params-j), end = '')
+        print('\rRemaining parameters: %3d' %(tot_params-j), end = '')
         j += 1
 #%%
 min_score = 1
@@ -70,9 +76,9 @@ for par, sc in score_list.items():
     if sc < min_score:
         min_score = sc
         opt_par = par
-print('Optimal parameters: %s\nTest error: %f' %(opt_par, min_score))
+print('Optimal parameters: %s\nTest accuracy: %f' %(opt_par, 1-min_score))
 #%%
-gamma, C = opt_par
+gamma, C = (0.125, 2) # optimal parameters
 
 Q = Q_matrix(X_train, Y_train, gamma)
 
@@ -93,5 +99,6 @@ lam_star = res.x
 for i in range(L):
     if lam_star[i] > 10**-6: break
 b = b_star(lam_star, X_train, Y_train, gamma, i)
-train_error = np.mean(np.multiply(np.transpose(Y_train),pred(X_train, lam_star, b, X_train, Y_train, gamma))[0] < 0)
-test_error = np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
+train_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_train),pred(X_train, lam_star, b, X_train, Y_train, gamma))[0] < 0)
+test_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
+print('Train accuracy: %f\nTest Accuracy: %f' %(train_accuracy, test_accuracy))

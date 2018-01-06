@@ -41,3 +41,31 @@ def pred(X_pred, lam, b, X_train, Y_train, gamma):
         predictions[idx] = np.sign(summation + b)
         idx += 1
     return predictions
+
+def RS_set(alpha, C, y_train):
+    Uplus = set()
+    Uminus = set()
+    Lplus = set()
+    Lminus = set()
+    mid = set()
+    i = 0
+    for a, y in zip(alpha, y_train):
+        if a < 10**-6:
+            if y < 0:
+                Lminus.add(i)
+            elif y > 0:
+                Lplus.add(i)
+        elif abs(C-a) < 10**-6:
+            if y < 0:
+                Uminus.add(i)
+            elif y > 0:
+                Uplus.add(i)
+        if a > 10**-6 and abs(C-a) > 10**-6:
+            mid.add(i)
+        i += 1
+    R = Lplus.union(Uminus.union(mid))
+    S = Lminus.union(Uplus.union(mid))
+    return list(R), list(S)
+
+def working_set(q, grad, y, R, S):
+
