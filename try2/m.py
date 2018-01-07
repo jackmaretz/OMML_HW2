@@ -88,7 +88,7 @@ constraint = {'type': 'eq', 'fun': const}
 bound = tuple((0,C) for i in range(L))
 
 res = minimize(fun = obj,
-               x0 = np.zeros(shape=(L,1)),
+               x0 = np.zeros(shape=L),
                args = (Q),
                method='SLSQP',
                bounds = bound,
