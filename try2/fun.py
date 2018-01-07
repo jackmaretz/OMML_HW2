@@ -68,4 +68,24 @@ def RS_set(alpha, C, y_train):
     return list(R), list(S)
 
 def working_set(q, grad, y, R, S):
+# =============================================================================
+#     I = set()
+#     J = set()
+#     I.update([np.argmax(vec_R)])
+#     J.update([np.argmin(vec_S)])
+# =============================================================================
+     if (q+1)%2 == 0:
+         print('Invalid q value')
+         return
+     q_star = int(q/2)
+     vec_R = -np.multiply(y, grad)[R]
+     vec_S = -np.multiply(y,grad)[S]
+
+     I = list(vec_R.argsort())[-q_star:]
+     J = list(vec_S.argsort())[:q_star]
+
+     W = I.extend(J)
+
+     return W
+
 
