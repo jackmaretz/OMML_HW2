@@ -68,7 +68,7 @@ def RS_set(alpha, C, y_train):
     S = Lminus.union(Uplus.union(mid))
     return list(R), list(S)
 
-def working_set(q, grad, y, R, S):
+def working_set(q, grad, Y_train, R, S):
 # =============================================================================
 #     I = set()
 #     J = set()
@@ -79,15 +79,15 @@ def working_set(q, grad, y, R, S):
          print('Invalid q value')
          return
      q_star = int(q/2)
-     vec_R = -np.multiply(y, grad)[R]
-     vec_S = -np.multiply(y, grad)[S]
+     vec_R = -np.multiply(Y_train.reshape(-1), grad)[R]
+     vec_S = -np.multiply(Y_train.reshape(-1), grad)[S]
 
      I = list(reversed(list(vec_R.argsort())[-q_star:]))
      J = list(vec_S.argsort())[:q_star]
 
      return I, J
 
-def SVM_light(q, X_train, y_train, gamma, C):
+def SVM_light(q_order, X_train, Y_train, gamma, C, max_iter = 1000):
     L = X_train.shape[0]
 
     alpha = np.zeros(L)
@@ -95,24 +95,22 @@ def SVM_light(q, X_train, y_train, gamma, C):
 
     k = 0
 
-    R, S = RS_set(alpha, C, y_train)
-    while abs(np.dot(alpha, y_train)) < 10**-6 and len(S) > 0 and len(R) > 0:
+    R, S = RS_set(alpha, C, Y_train)
+    while k < max_iter and len(S) > 0 and len(R) > 0:
 
-        I, J = working_set(q, grad, y_train, R, S)
+        I, J = working_set(q_order, grad, Y_train, R, S)
         for i, j in zip(I,J):
             lam = np.array([alpha[i], alpha[j]])
-            y = np.array([])
-            q = lambda k, l: y_train[k]*y_train[l]*kernel(X_train[k], X_train[l], gamma)
-            Q = np.array([[q(i,i), q(i,j)],
-                          [q(j,i), q(j,j)]])
-
+            y = np.array([Y_train[i][0], Y_train[j][0]])
+            q = lambda k, l: Y_train[k][0]*Y_train[l][0]*kernel(X_train[k], X_train[l], gamma)
+            Q = np.array([[q(i,i), q(i,j)],[q(j,i), q(j,j)]])
             const = lambda lam: con(lam, y)
             constraint = {'type': 'eq', 'fun': const}
 
             bound = tuple((0,C) for i in range(2))
 
             res = minimize(fun = obj,
-                           x0 = nlam,
+                           x0 = lam,
                            args = (Q),
                            method='SLSQP',
                            bounds = bound,
@@ -126,8 +124,9 @@ def SVM_light(q, X_train, y_train, gamma, C):
             alpha[i], alpha[j] = alpha_star[0], alpha_star[1]
 
         k = k+1
-        R, S = RS_set(alpha, C, y_train)
-
+        R, S = RS_set(alpha, C, Y_train)
+        print('\r%d'%k, end = '')
+    print('')
     return alpha
 
 

@@ -14,7 +14,6 @@ from collections import Counter
 from fun import *
 from sklearn.preprocessing import scale
 
-h_gamma = 0.0001
 seed = 1733715
 np.random.seed(seed = seed)
 
@@ -96,6 +95,15 @@ res = minimize(fun = obj,
 
 
 lam_star = res.x
+for i in range(L):
+    if lam_star[i] > 10**-6: break
+b = b_star(lam_star, X_train, Y_train, gamma, i)
+train_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_train),pred(X_train, lam_star, b, X_train, Y_train, gamma))[0] < 0)
+test_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
+print('Train accuracy: %f\nTest Accuracy: %f' %(train_accuracy, test_accuracy))
+
+#%%
+lam_star = SVM_light(10, X_train, Y_train, gamma, C, 100)
 for i in range(L):
     if lam_star[i] > 10**-6: break
 b = b_star(lam_star, X_train, Y_train, gamma, i)
