@@ -53,6 +53,7 @@ for gamma in gamma_values:
                        x0 = np.zeros(shape=(L,1)),
                        args = (Q),
                        method='SLSQP',
+                       jac = jac,
                        bounds = bound,
                        constraints= constraint)
 
@@ -103,9 +104,11 @@ test_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_st
 print('Train accuracy: %f\nTest Accuracy: %f' %(train_accuracy, test_accuracy))
 
 #%%
-lam_star = SVM_light(10, X_train, Y_train, gamma, C, 100)
+gamma, C, q_order = (0.125, 2, 2) # optimal parameters
+
+lam_star = SVM_light(q_order, X_train, Y_train, gamma, C, 1)
 for i in range(L):
-    if lam_star[i] > 10**-6: break
+    if not np.isclose(lam_star[i], 0): break
 b = b_star(lam_star, X_train, Y_train, gamma, i)
 train_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_train),pred(X_train, lam_star, b, X_train, Y_train, gamma))[0] < 0)
 test_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
