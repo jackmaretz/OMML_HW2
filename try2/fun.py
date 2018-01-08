@@ -93,7 +93,7 @@ def working_set(q_order, grad, Y_train, R, S):
 def SVM_light(q_order, X_train, Y_train, gamma, C, max_iter = 1000):
     L = X_train.shape[0]
 
-    alpha = np.zeros(L)
+
     grad = np.ones(L)
 
     k = 0
@@ -113,7 +113,25 @@ def SVM_light(q_order, X_train, Y_train, gamma, C, max_iter = 1000):
         bound = tuple((0,C) for i in range(q_order))
 
         res = minimize(fun = obj, x0 = lam, args = (Q), method='SLSQP', jac = jac, bounds = bound, constraints= constraint)
+        ##############
+        a = res.x
 
+        YR = []
+        resR = []
+        for i in R:
+            YR.append(Y_train.item(i))
+            resR.append(a.item(i))
+
+        YS = []
+        resS = []
+        for j in S:
+            YS.append(Y_train.item(j))
+            resS.append(a.item(j))
+        ma = max(np.multiply(np.negative(YR), resR))
+        mi = min(np.multiply(np.negative(YS), resS))
+        if ma > mi:
+            break
+            ################
         alpha_star = res.x
         print(alpha_star)
         for idx, i in zip(range(L), W):

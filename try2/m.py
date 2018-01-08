@@ -113,3 +113,24 @@ b = b_star(lam_star, X_train, Y_train, gamma, i)
 train_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_train),pred(X_train, lam_star, b, X_train, Y_train, gamma))[0] < 0)
 test_accuracy = 1 - np.mean(np.multiply(np.transpose(Y_test),pred(X_test, lam_star, b, X_train, Y_train, gamma))[0] < 0)
 print('Train accuracy: %f\nTest Accuracy: %f' %(train_accuracy, test_accuracy))
+
+# obj=>1/2 * np.matmul(np.matmul(np.transpose(lam), Q), lam) - sum(lam)
+
+# max(-Y_train[idxR] * res.x) > min(-Y_train[idxS] * res.x)
+# a = res.x
+#
+# YR = []
+# resR = []
+# for i in R :
+#     YR.append(Y_train.item(i))
+#     resR.append(a.item(i))
+#
+# YS = []
+# resS = []
+# for j in S :
+#     YS.append(Y_train.item(j))
+#     resS.append(a.item(j))
+#     ma = max(np.multiply(-YR, resR))
+#     mi = min(np.multiply(-YS, resS))
+# if ma > mi:
+#     break
